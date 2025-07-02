@@ -44,7 +44,6 @@ func NewBroker(ctx context.Context) *Broker {
 
 // Run starts the broker event loop (goroutine)
 func (b *Broker) Run() {
-	// TODO: Implement event loop (fan-in/fan-out pattern)
 	go func() {
 		for {
 			select {
