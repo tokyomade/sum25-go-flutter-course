@@ -65,8 +65,8 @@ class MyHomePage extends StatelessWidget {
                 padding: EdgeInsets.all(16.0),
                 // TODO: change to ProfileCard
                 child: ProfileCard(
-                  name: 'John Doe',
-                  avatarUrl: 'https://pin.it/240hSCOKK',
+                  name: 'test',
+                  avatarUrl: 'https://i.pinimg.com/736x/e7/ad/d3/e7add39e042a9f09fef209a0587df6fd.jpg',
                   age: 19,
                   email: 'example@email.com'
                 ),
