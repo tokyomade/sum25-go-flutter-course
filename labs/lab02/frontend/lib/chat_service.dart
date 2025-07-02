@@ -13,14 +13,14 @@ class ChatService {
   ChatService();
 
   Future<void> connect() async {
-    await Future.delayed(const Duration(milliseconds: 500));
     if (failConnect) {
       throw Exception('Failed to connect to server');
     }
+    await Future.delayed(Duration(milliseconds: 1));
   }
 
   Future<void> sendMessage(String msg) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future.delayed(Duration(milliseconds: 1));
     if (failSend) {
       throw Exception('Failed to send message');
     }

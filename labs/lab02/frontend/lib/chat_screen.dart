@@ -22,22 +22,17 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     widget.chatService.connect().then((_) {
+      _subscription = widget.chatService.messageStream.listen((msg) {
+        setState(() {
+          _messages.add(msg);
+        });
+      });
       setState(() {
         _isLoading = false;
-        _error = null;
       });
-      _subscription = widget.chatService.messageStream.listen((message) {
-        setState(() {
-          _messages.add(message);
-        });
-      }, onError: (e) {
-        setState(() {
-          _error = 'Connection error: $e';
-        });
-      });
-    }).catchError((e) {
+    }).catchError((err) {
       setState(() {
-        _error = 'Connection error: $e';
+        _error = 'Connection error: $err';
         _isLoading = false;
       });
     });
@@ -45,80 +40,66 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    _controller.dispose();
     _subscription?.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
   void _sendMessage() async {
     final text = _controller.text;
     if (text.isEmpty) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
       await widget.chatService.sendMessage(text);
       _controller.clear();
-    } catch (e) {
-      setState(() {
-        _error = 'Sending error: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Build chat UI with loading, error, and message list
-    return Scaffold(
-      appBar: AppBar(title: const Text('Chat')),
-      body: Column(
-        children: [
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(_error!, style: const TextStyle(color: Colors.red)),
-            ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _messages.length,
-              itemBuilder: (context, index) => ListTile(
-                title: Text(_messages[index]),
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(child: Text(_error!));
+    }
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: _messages.length,
+            itemBuilder: (context, i) => Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 2),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(_messages[i]),
               ),
             ),
           ),
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: const InputDecoration(
-                      hintText: 'Type a message...',
-                    ),
-                    onSubmitted: (_) => _sendMessage(),
-                  ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                decoration: const InputDecoration(
+                  hintText: 'Type a message',
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _isLoading ? null : _sendMessage,
-                ),
-              ],
+                onSubmitted: (_) => _sendMessage(),
+              ),
             ),
-          ),
-        ],
-      ),
+            IconButton(
+              icon: const Icon(Icons.send),
+              onPressed: _sendMessage,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

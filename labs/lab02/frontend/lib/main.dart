@@ -11,8 +11,8 @@ void main() {
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
 
-  final ChatService _chatService = ChatService();
-  final UserService _userService = UserService();
+  final _chatService = ChatService();
+  final _userService = UserService();
 
   @override
   Widget build(BuildContext context) {

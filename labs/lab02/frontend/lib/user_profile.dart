@@ -16,7 +16,6 @@ class _UserProfileState extends State<UserProfile> {
   bool _isLoading = true;
   String? _error;
 
-
   @override
   void initState() {
     super.initState();
@@ -25,9 +24,9 @@ class _UserProfileState extends State<UserProfile> {
         _username = data;
         _isLoading = false;
       });
-    }).catchError((err) {
+    }).catchError((e) {
       setState(() {
-        _error = 'error: $err';
+        _error = 'error: $e';
         _isLoading = false;
       });
     });
@@ -36,21 +35,20 @@ class _UserProfileState extends State<UserProfile> {
   @override
   Widget build(BuildContext context) {
     // TODO: Build user profile UI with loading, error, and user info
-    return Scaffold(
-      appBar: AppBar(title: const Text('User Profile')),
-      body: Center(
-        child: _isLoading
-        ? const CircularProgressIndicator()
-        : _error != null
-            ? Text(_error!, style: const TextStyle(color: Colors.red))
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Name: ${_username?['name'] ?? ''}'),
-                  Text('Email: ${_username?['email'] ?? ''}'),
-                ],
-              ),
-      ),
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(
+          child: Text(_error!, style: const TextStyle(color: Colors.red)));
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(_username?['name'] ?? '', style: const TextStyle(fontSize: 20)),
+        const SizedBox(height: 8),
+        Text(_username?['email'] ?? ''),
+      ],
     );
   }
 }
