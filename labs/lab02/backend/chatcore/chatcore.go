@@ -51,23 +51,30 @@ func (b *Broker) Run() {
 			case <-b.ctx.Done():
 				close(b.done)
 				return
-			case msg := <-b.input:
+			case msg, ok := <-b.input:
+				if !ok {
+					close(b.done)
+					return
+				}
+				sendWithTimeout := func(ch chan Message, msg Message) bool {
+					select {
+					case ch <- msg:
+						return true
+					case <-time.After(500 * time.Millisecond):
+						return false
+					case <-b.ctx.Done():
+						return false
+					}
+				}
+
 				b.usersMutex.RLock()
 				if msg.Broadcast {
-					for userID, ch := range b.users {
-						if userID != msg.Sender {
-							select {
-							case ch <- msg:
-							default:
-							}
-						}
+					for _, ch := range b.users {
+						sendWithTimeout(ch, msg)
 					}
 				} else {
 					if ch, ok := b.users[msg.Recipient]; ok {
-						select {
-						case ch <- msg:
-						default:
-						}
+						sendWithTimeout(ch, msg)
 					}
 				}
 				b.usersMutex.RUnlock()
