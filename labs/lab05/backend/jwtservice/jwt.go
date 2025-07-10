@@ -65,6 +65,7 @@ func (j *JWTService) GenerateToken(userID int, email string) (string, error) {
 // - Check token signature with secret key
 // - Verify token is not expired
 // - Return parsed claims on success
+
 func (j *JWTService) ValidateToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
